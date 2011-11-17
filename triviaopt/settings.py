@@ -26,6 +26,8 @@ TIME_ZONE = 'America/New_York'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
+FORCE_SCRIPT_NAME="http://trivia.axiak.net/"
+
 SITE_ID = 1
 
 USE_I18N = False
@@ -100,9 +102,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
+    'triviaopt.jeopardy',
 )
 
 # A sample logging configuration. The only tangible logging

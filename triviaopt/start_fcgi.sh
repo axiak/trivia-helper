@@ -16,3 +16,4 @@ exec /usr/bin/env - \
   ./manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE
 
 chmod 777 "$SOCKET"
+chmod 777 "$SOCKET"
