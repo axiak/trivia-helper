@@ -3,6 +3,11 @@ import random
 import datetime
 import collections
 
+try:
+    from collections import Counter
+except ImportError:
+    from utils import Counter
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -137,7 +142,7 @@ class AnswerSession(models.Model):
     def get_breakdowns(self):
         if self._breakdowns:
             return self._breakdowns
-        self._breakdowns = collections.Counter(Answer.objects.filter(session=self).values_list('question__category__meta_category', flat=True))
+        self._breakdowns = Counter(Answer.objects.filter(session=self).values_list('question__category__meta_category', flat=True))
         return self._breakdowns
 
     def get_user_questions(self):
