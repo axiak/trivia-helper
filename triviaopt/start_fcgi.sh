@@ -11,6 +11,9 @@ PIDFILE="$PROJDIR/mysite.pid"
 SOCKET="/tmp/mysite.sock"
 
 cd $PROJDIR
+
+source bin/activate
+
 if [ -f $PIDFILE ]; then
     kill `cat -- $PIDFILE`
     rm -f -- $PIDFILE
@@ -18,6 +21,8 @@ fi
 
 nohup /usr/bin/env - \
   PYTHONPATH="../python:.." \
-  ./manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE &>/dev/null
+  ./manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE \
+              maxchildren=3 errlog=$PROJDIR/error.log \
+              outlog=$PROJDIR/out.log  &>/dev/null
 
 chmod 777 "$SOCKET"

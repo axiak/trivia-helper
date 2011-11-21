@@ -75,7 +75,7 @@ class Question(models.Model):
         _or_re = re.compile(r'\bor\b')
         _paren_re = re.compile(r'\([^\)]+\)')
         answer = answer.lower().strip()
-        result = {answer}
+        result = set([answer])
         result.add(answer.replace("(", "").replace(")", "").strip())
         if '(' in answer and _or_re.search(answer):
             result.update(itertools.chain.from_iterable(

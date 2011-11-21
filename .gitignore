@@ -7,3 +7,6 @@ lib/
 *pyc
 outputs
 data/
+mysite.pid
+out.log
+error.log
