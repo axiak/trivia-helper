@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+
+{% block subtitle %}Session{% endblock %}
+
+
+{% block content %}
+<p>
+You are running a session started on {{ session.date|date:"N j, Y H:i:s" }}
+<a href="/?createSession=true">(start a new one)</a>
+</p>
+
+<div id="question-container">
+  <div id="question">
+  </div>
+  <label for="answer">Answer: </label>
+  <form id="answerform">
+    <input type="text" id="answer" name="answer">
+    <input type="submit" value="Submit">
+  </form>
+</div>
+
+
+<div id="answer-container">
+
+</div>
+
+{% endblock %}
+
+{% block bottomjs %}
+{{ block.super }}
+<script defer src="/static/js/main.coffee" type="text/coffeescript"></script>
+{% endblock %}

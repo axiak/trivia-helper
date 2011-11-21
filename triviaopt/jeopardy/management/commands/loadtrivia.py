@@ -16,8 +16,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self._load_data()
 
-        print self.__dict__
-
         with open(args[0]) as input_file:
             for line in input_file:
                 row = simplejson.loads(line.rstrip().decode('utf8'))
@@ -45,7 +43,7 @@ class Command(BaseCommand):
             category = Category.objects.create(name=row['category'],
                                                comments=(row['category_comments'] or None))
             category_id = category.id
-            self.categories_map[category_id] = category
+            self.categories_map[category.name] = category_id
 
         try:
             Question.objects.create(

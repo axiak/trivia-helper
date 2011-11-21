@@ -1,9 +1,13 @@
+import math
+import random
 import datetime
+import collections
 
 from django.db import models
 from django.contrib.auth.models import User
 
-__all__ = ('Game', 'Category', 'Contestant', 'Question', 'Answer',)
+__all__ = ('Game', 'Category', 'Contestant', 'Question', 'Answer',
+           'AnswerSession',)
 
 class Game(models.Model):
     date = models.DateField(db_index=True)
@@ -18,6 +22,7 @@ class Game(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=1024)
     comments = models.TextField(null=True, blank=True)
+    meta_category = models.IntegerField(null=True, blank=True)
     mean_value = models.FloatField(blank=True, null=True)
 
     def __unicode__(self):
@@ -58,16 +63,115 @@ class Question(models.Model):
     answered_incorrectly = models.IntegerField()
     answered_correctly = models.IntegerField()
 
+    computed_value = models.FloatField(blank=True, null=True, db_index=True)
+
+    def is_correct(self, other_answer):
+        return other_answer.strip().lower() in Question.normalize_answer(self.answer)
+
+    @classmethod
+    def normalize_answer(cls, answer):
+        import re
+        import itertools
+        _or_re = re.compile(r'\bor\b')
+        _paren_re = re.compile(r'\([^\)]+\)')
+        answer = answer.lower().strip()
+        result = {answer}
+        result.add(answer.replace("(", "").replace(")", "").strip())
+        if '(' in answer and _or_re.search(answer):
+            result.update(itertools.chain.from_iterable(
+                    cls.normalize_answer(piece)
+                    for piece in _or_re.split(answer)
+                    if piece.strip()))
+        if '(' in answer:
+            result.add(_paren_re.sub('', answer).strip())
+        return result
+
     class Meta:
         unique_together = ('game', 'number')
         ordering = ['-game__date', 'number']
 
     def value(self):
-        return self.price
+        if hasattr(self, '_value_cached'):
+            return self._value_cached
+        # logit
+        _logit_coefficients = (-1.707015765, 0.000150362, 0.211078614,
+                                0.0, 0.226851628, 0.0, 0.271769689,
+                                0.232831474, 0.242451134, 0.293743018, 0.0,
+                                0.42205324, 0.228055767, 0.390339103, 0.110244457,
+                                0.240846623, 0.301152817, 0.165676702, 0.0,
+                                0.25414831, 0.0, 0.236327479, 0.136417475, 0.0,
+                                0.152464981, 0.138780691, 0.128021677, 0.205386742,
+                                0.196025007, 0.181441473, 0.160830982, 0.0, 0.0
+                                )
+        price = self.price or 20000
+
+        vector = [1.0, price, self.round] + [0.0] * 30
+
+        meta_category = Question.category_cache.get(self.category_id)
+        if meta_category is None:
+            meta_category = Question.category_cache.setdefault(self.category_id, self.category.meta_category)
+        vector[meta_category + 3] = 1.0
+
+        z = sum(a * b for a, b in zip(vector, _logit_coefficients))
+        result = 1 / (1.0 + math.exp(-z))
+        self._value_cached = result
+        return result
 
     def __unicode__(self):
         return u'<Question: {0}>'.format(self.value())
 
+Question.category_cache = {}
+
+class AnswerSession(models.Model):
+    date = models.DateTimeField(default=datetime.datetime.now, db_index=True)
+    user = models.ForeignKey(User, db_index=True)
+
+    _breakdowns = None
+    _user_questions = None
+    _category_scores = None
+    _category_questions = None
+
+    def __unicode__(self):
+        return u'Session started on {}'.format(self.date)
+
+    def get_breakdowns(self):
+        if self._breakdowns:
+            return self._breakdowns
+        self._breakdowns = collections.Counter(Answer.objects.filter(session=self).values_list('question__category__meta_category', flat=True))
+        return self._breakdowns
+
+    def get_user_questions(self):
+        if self._user_questions:
+            return self._user_questions
+        self._user_questions = set(Answer.objects.filter(user=self.user).values_list('question_id', flat=True))
+        return self._user_questions
+
+    def get_category_scores(self):
+        if self._category_scores:
+            return self._category_scores
+        self._category_scores = collections.defaultdict(float)
+        for key, value in Category.objects.values_list('meta_category', 'mean_value', flat=True):
+            self._category_scores[key] += value
+        return self._category_scores
+
+    def get_category_questions(self, meta_category):
+        if self._category_questions:
+            return self._category_questions
+        questions = list(Question.objects.filter(category__meta_category=meta_category).order_by('-computed_value').values_list('id', flat=True))
+        return questions
+
+        #cats = self.get_breakdowns().keys()
+        #self._category_questions = {}
+        #for cat in cats:
+        #for question in Question.objects.all():
+        #    question.computed_value = question.value()
+        #    question.save()
+        #questions = list(Question.objects.filter(category__meta_category = meta_category))
+        #random.shuffle(questions)
+        #questions.sort(key=lambda q: q.value(), reverse=True)
+        #return map(lambda x: x.id, questions)
+        #self._category_questions[cat] = map(lambda q: q.pk, questions)
+        #return self._category_questions
 
 class Answer(models.Model):
     date = models.DateTimeField(default=datetime.datetime.now)
@@ -75,6 +179,7 @@ class Answer(models.Model):
     user = models.ForeignKey(User)
     answer = models.CharField(max_length=1024)
     correct = models.BooleanField()
+    session = models.ForeignKey(AnswerSession, blank=True, null=True)
 
     def __unicode__(self):
         return u'<Answer by {} on {} ({})>'.format(self.user,

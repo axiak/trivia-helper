@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(id -u) -eq 0 ]]; then
+    sudo -H -i -u axiak "$0"
+    exit 0
+fi
+
 # Replace these three settings.
 PROJDIR="/home/axiak/BigDocuments/trivia/triviaopt"
 PIDFILE="$PROJDIR/mysite.pid"
@@ -11,9 +16,8 @@ if [ -f $PIDFILE ]; then
     rm -f -- $PIDFILE
 fi
 
-exec /usr/bin/env - \
+nohup /usr/bin/env - \
   PYTHONPATH="../python:.." \
-  ./manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE
+  ./manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE &>/dev/null
 
-chmod 777 "$SOCKET"
 chmod 777 "$SOCKET"

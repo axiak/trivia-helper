@@ -6,7 +6,10 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'triviaopt.views.home', name='home'),
+    url(r'^$', 'triviaopt.jeopardy.views.index', name='index'),
+    url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
+    url(r'^next-question/$', 'triviaopt.jeopardy.views.next_question', name='next'),
+    url(r'^answer-question/$', 'triviaopt.jeopardy.views.answer_question', name='answer'),
     # url(r'^triviaopt/', include('triviaopt.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
