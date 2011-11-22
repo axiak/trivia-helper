@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^login/$', 'django.contrib.auth.views.login', name='login'),
     url(r'^next-question/$', 'triviaopt.jeopardy.views.next_question', name='next'),
     url(r'^answer-question/$', 'triviaopt.jeopardy.views.answer_question', name='answer'),
+    url(r'^change-answer/$', 'triviaopt.jeopardy.views.change_answer', name='change_answer'),
     # url(r'^triviaopt/', include('triviaopt.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
