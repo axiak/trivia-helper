@@ -143,6 +143,9 @@ class AnswerSession(models.Model):
         if self._breakdowns:
             return self._breakdowns
         self._breakdowns = Counter(Answer.objects.filter(session=self).values_list('question__category__meta_category', flat=True))
+        for i in set(Category.objects.values_list('meta_category', flat=True)):
+            if i not in self._breakdowns:
+                self._breakdowns[i] = 0
         return self._breakdowns
 
     def get_user_questions(self):
