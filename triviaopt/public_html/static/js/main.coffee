@@ -47,7 +47,7 @@ $(() ->
             $(".change-answer").click (e) ->
               e.preventDefault()
               $.ajax("/change-answer", { data: { answer_id: data.answer_id } })
-              $(".change-answer").delete()
+              $(".change-answer").remove()
               return false
             loadQuestion()
       })
