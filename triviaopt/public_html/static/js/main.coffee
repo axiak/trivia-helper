@@ -45,6 +45,7 @@ $(() ->
               <a href="foo" class="change-answer">(#{if data.is_correct then "Actually wrong?" else "Actually right?"})</a>
             """)
             $(".change-answer").click (e) ->
+              e.preventDefault()
               $.ajax("/change-answer", { data: { answer_id: data.answer_id } })
               $(".change-answer").delete()
               return false
