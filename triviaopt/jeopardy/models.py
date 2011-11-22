@@ -137,7 +137,7 @@ class AnswerSession(models.Model):
     _category_questions = None
 
     def __unicode__(self):
-        return u'Session started on {}'.format(self.date)
+        return u'Session started on {0}'.format(self.date)
 
     def get_breakdowns(self):
         if self._breakdowns:
@@ -187,7 +187,7 @@ class Answer(models.Model):
     session = models.ForeignKey(AnswerSession, blank=True, null=True)
 
     def __unicode__(self):
-        return u'<Answer by {} on {} ({})>'.format(self.user,
+        return u'<Answer by {0} on {1} ({2})>'.format(self.user,
                                                    self.date,
                                                    'correct' if self.correct else 'incorrect')
 
