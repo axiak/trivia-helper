@@ -20,6 +20,7 @@ $(() ->
           <td class="question">
             <div class="inner-clue">
               #{data[0].fields.clue}
+              <br>(#{data[0].fields.category[0].fields.meta_category})
             </div>
           </td>
         </tr>
