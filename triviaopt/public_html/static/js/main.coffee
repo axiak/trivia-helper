@@ -47,7 +47,7 @@ $(() ->
             $(".change-answer").click (e) ->
               $.ajax("/change-answer", { data: { answer_id: data.answer_id } })
               $(".change-answer").delete()
-              false
+              return false
             loadQuestion()
       })
     false
