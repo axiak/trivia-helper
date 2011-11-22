@@ -165,9 +165,7 @@ class AnswerSession(models.Model):
     def get_category_questions(self, meta_category):
         if self._category_questions:
             return self._category_questions
-        questions = list(Question.objects.filter(category__meta_category=meta_category).order_by('-computed_value').values_list('id', flat=True))
-        import random
-        random.shuffle(questions)
+        questions = list(Question.objects.filter(category__meta_category=meta_category).order_by('?').values_list('id', flat=True))
         return questions
 
         #cats = self.get_breakdowns().keys()
