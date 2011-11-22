@@ -168,7 +168,7 @@ class AnswerSession(models.Model):
         if self._category_questions:
             return self._category_questions
         questions = list(Question.objects.filter(category__meta_category=meta_category
-                                                 ).exclude(id__in=seen_questions)
+                                                 ).exclude(id__in=seen_questions
                                                  ).order_by('random_weight').values_list('id', flat=True)[:1])
         return questions
 
