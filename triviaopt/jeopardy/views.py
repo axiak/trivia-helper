@@ -79,5 +79,16 @@ def answer_question(request, session):
                                    correct=correct,
                                    session=session)
     answer.save()
-    return HttpResponse(simplejson.dumps({'is_correct': correct, 'correct_response': question.answer}),
+    return HttpResponse(simplejson.dumps({'is_correct': correct,
+                                          'correct_response': question.answer,
+                                          'answer_id': answer.pk}),
                                          mimetype="application/json")
+
+@with_session
+def change_answer(request, session):
+    answer = Answer.objects.get(id=request.GET.get('answer_id'))
+    answer.correct = not answer.correct
+    answer.save()
+    return HttpResponse(simplejson.dumps({'is_correct': answer.correct,
+                                          'answer_id': answer.pk}),
+                        mimetype="application/json")

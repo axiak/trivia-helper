@@ -324,7 +324,22 @@ p.comments {
 
 .inner-clue {
     width: 200px;
-    height: 200px;
+    height: 150px;
     padding: 20px;
     font-size: 13pt;
+}
+
+#answer-container {
+    margin: 20px;
+}
+
+span.result {
+    font-weight: bold;
+    font-size: 18px;
+    color: #006;
+}
+
+span.actual-answer {
+    font-size: 15px;
+    font-weight: bold;
 }

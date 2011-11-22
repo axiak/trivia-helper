@@ -42,7 +42,10 @@ $(() ->
             $("#answer-container").html("""
               <span class="result">#{if data.is_correct then "Correct" else "Incorrect!"}</span>
               <span class="actual-answer">#{data.correct_response}</span>
+              <a href="#" class="change-answer">(#{if data.is_correct then "Actually wrong?" else "Actually right?"})</a>
             """)
+            $(".change-answer").click (e) ->
+              $.ajax("/change-answer", { data: { answer_id: data.answer_id } })
             loadQuestion()
       })
     false
