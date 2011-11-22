@@ -11,3 +11,5 @@ data/
 mysite.pid
 out.log
 error.log
+triviaopt/public_html/static/js/main.js
+

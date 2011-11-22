@@ -14,6 +14,8 @@ cd $PROJDIR
 
 source bin/activate
 
+coffee -c public_html/static/js/main.coffee
+
 if [ -f $PIDFILE ]; then
     kill `cat -- $PIDFILE`
     rm -f -- $PIDFILE
