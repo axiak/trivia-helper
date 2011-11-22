@@ -164,10 +164,12 @@ class AnswerSession(models.Model):
             self._category_scores[key] += value
         return self._category_scores
 
-    def get_category_questions(self, meta_category):
+    def get_category_questions(self, meta_category, seen_questions=()):
         if self._category_questions:
             return self._category_questions
-        questions = list(Question.objects.filter(category__meta_category=meta_category).order_by('random_weight').values_list('id', flat=True))
+        questions = list(Question.objects.filter(category__meta_category=meta_category
+                                                 ).exclude(id__in=seen_questions)
+                                                 ).order_by('random_weight').values_list('id', flat=True)[:1])
         return questions
 
         #cats = self.get_breakdowns().keys()

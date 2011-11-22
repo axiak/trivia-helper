@@ -48,7 +48,7 @@ def next_question(request, session):
     random.shuffle(meta)
     meta.sort(key=lambda x: x[1])
     category = meta[0][0]
-    questions_list = session.get_category_questions(category)
+    questions_list = session.get_category_questions(category, user_questions)
     question_id = questions_list[0]
     for question_id in questions_list:
         if question_id not in user_questions:
