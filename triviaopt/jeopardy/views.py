@@ -79,6 +79,10 @@ def answer_question(request, session):
                                    correct=correct,
                                    session=session)
     answer.save()
+    breakdowns = session.get_breakdowns()
+    user_questions = session.get_user_questions()
+    breakdowns[question.category.meta_category] += 1
+    user_questions.add(question.id)
     return HttpResponse(simplejson.dumps({'is_correct': correct,
                                           'correct_response': question.answer,
                                           'answer_id': answer.pk}),
