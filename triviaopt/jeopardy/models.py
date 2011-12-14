@@ -73,7 +73,7 @@ class Question(models.Model):
     random_weight = models.FloatField(blank=True, null=True, db_index=True)
 
     def is_correct(self, other_answer):
-        return other_answer.strip().lower() in Question.normalize_answer(self.answer)
+        return Question.normalize_single_answer(other_answer) in Question.normalize_answer(self.answer)
 
     @classmethod
     def normalize_answer(cls, answer):
@@ -81,7 +81,7 @@ class Question(models.Model):
         import itertools
         _or_re = re.compile(r'\bor\b')
         _paren_re = re.compile(r'\([^\)]+\)')
-        answer = answer.lower().strip()
+        answer = cls.normalize_single_answer(answer)
         result = set([answer])
         result.add(answer.replace("(", "").replace(")", "").strip())
         if '(' in answer and _or_re.search(answer):
@@ -92,6 +92,14 @@ class Question(models.Model):
         if '(' in answer:
             result.add(_paren_re.sub('', answer).strip())
         return result
+
+    @classmethod
+    def normalize_single_answer(cls, answer):
+        tokens = answer.strip().lower().split()
+        for bad_word in ('the', 'an', 'a'):
+            if bad_word in tokens:
+                tokens.remove(bad_word)
+        return ' '.join(tokens)
 
     class Meta:
         unique_together = ('game', 'number')
@@ -171,6 +179,36 @@ class AnswerSession(models.Model):
                                                  ).exclude(id__in=seen_questions
                                                  ).order_by('random_weight').values_list('id', flat=True)[:1])
         return questions
+
+    def get_next_questions(self):
+        breakdowns = self.get_breakdowns()
+        user_questions = self.get_user_questions()
+        meta = breakdowns.items()
+        random.shuffle(meta)
+        meta.sort(key=lambda x: x[1])
+        category = meta[0][0]
+        questions_list = self.get_category_questions(category, user_questions)
+        question_id = questions_list[0]
+        for question_id in questions_list:
+            if question_id not in user_questions:
+                break
+        return Question.objects.filter(id=question_id).select_related()
+
+
+    def answer_question(self, user, question_id, answer):
+        question = Question.objects.get(pk=question_id)
+        correct = question.is_correct(answer)
+        answer = Answer.objects.create(question=question,
+                                       user=user,
+                                       answer=answer,
+                                       correct=correct,
+                                       session=self)
+        answer.save()
+        breakdowns = self.get_breakdowns()
+        user_questions = self.get_user_questions()
+        breakdowns[question.category.meta_category] += 1
+        user_questions.add(question.id)
+        return correct
 
         #cats = self.get_breakdowns().keys()
         #self._category_questions = {}

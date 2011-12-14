@@ -42,20 +42,9 @@ def index(request, session):
 
 @with_session
 def next_question(request, session):
-    breakdowns = session.get_breakdowns()
-    user_questions = session.get_user_questions()
-    meta = breakdowns.items()
-    random.shuffle(meta)
-    meta.sort(key=lambda x: x[1])
-    category = meta[0][0]
-    questions_list = session.get_category_questions(category, user_questions)
-    question_id = questions_list[0]
-    for question_id in questions_list:
-        if question_id not in user_questions:
-            break
     json_serializer = serializers.get_serializer("json")()
 
-    questions = Question.objects.filter(id=question_id).select_related()
+    questions = session.get_next_questions()
 
     json_info = simplejson.loads(json_serializer.serialize(questions,
                                                            ensure_ascii=False))
@@ -71,18 +60,8 @@ def next_question(request, session):
 def answer_question(request, session):
     question_id = request.GET['question_id']
     answer = request.GET['answer']
-    question = Question.objects.get(pk=question_id)
-    correct = question.is_correct(answer)
-    answer = Answer.objects.create(question=question,
-                                   user=request.user,
-                                   answer=answer,
-                                   correct=correct,
-                                   session=session)
-    answer.save()
-    breakdowns = session.get_breakdowns()
-    user_questions = session.get_user_questions()
-    breakdowns[question.category.meta_category] += 1
-    user_questions.add(question.id)
+    is_correct = session.answer_question(request.user, question_id, answer)
+
     return HttpResponse(simplejson.dumps({'is_correct': correct,
                                           'correct_response': question.answer,
                                           'answer_id': answer.pk}),
