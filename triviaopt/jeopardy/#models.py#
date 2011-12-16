@@ -28,7 +28,6 @@ class Category(models.Model):
     name = models.CharField(max_length=1024)
     comments = models.TextField(null=True, blank=True)
     meta_category = models.IntegerField(null=True, blank=True)
-    meta_category_name = models.CharField(max_length=1024)
     mean_value = models.FloatField(blank=True, null=True)
 
     def __unicode__(self):
@@ -76,8 +75,8 @@ class Question(models.Model):
     def is_correct(self, other_answer):
         return Question.normalize_single_answer(other_answer) in Question.normalize_answer(self.answer)
 
-    @classmethod
-    def normalize_answer(cls, answer):
+    @classmethod 
+   def normalize_answer(cls, answer):
         import re
         import itertools
         _or_re = re.compile(r'\bor\b')
