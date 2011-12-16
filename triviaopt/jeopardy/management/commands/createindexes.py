@@ -51,6 +51,9 @@ class Command(BaseCommand):
         categories = list(category_tfidf)
         random.shuffle(categories)
 
+        tfidf_norms = {category: sum(value**2 for value in tfidf.values())
+                       for category, tfidf in category_tfidf.items()}
+
         distances = []
         for i, category1 in enumerate(categories):
             cat1_tfidf = category_tfidf[category1]
@@ -58,7 +61,7 @@ class Command(BaseCommand):
             for j, category2 in enumerate(categories):
                 if j >= i:
                     break
-                row_array[j] = self.compute_distance(cat1_tfidf, category_tfidf[category2])
+                row_array[j] = self.compute_distance(cat1_tfidf, category_tfidf[category2], tfidf_norms[category1], tfidf_norms[category2])
 
             distances.append(row_array)
 
@@ -72,6 +75,12 @@ class Command(BaseCommand):
 
         return categories
 
+    def compute_distance(self, tfidf1, tfidf2, norm1, norm2):
+        if len(tfidf1) > len(tfidf2):
+            tfidf1, tfidf2 = tfidf2, tfidf1
+        numerator = sum(value * tfidf2.get(key, 0) for key, value in tfidf1.items())
+        cossim = numerator / math.sqrt(norm1 * norm2)
+        return 1 / (1 + cossim) - 0.5
 
     def build_tfidf(self):
         document_frequency = collections.Counter()
