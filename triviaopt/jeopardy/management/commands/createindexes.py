@@ -1,9 +1,11 @@
 import os
 import math
+import random
 import datetime
 import itertools
 import simplejson
 import collections
+import re
 
 from numpy import ndarray, array
 from scipy.cluster.vq import vq, kmeans2, whiten
@@ -12,6 +14,8 @@ from django.core.management.base import BaseCommand, CommandError
 from triviaopt.jeopardy.models import *
 
 from . import porter
+
+non_word_re = re.compile(r'\W+')
 
 class Command(BaseCommand):
     args = 'number of clusters'
@@ -25,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self._load_stopwords()
 
-        num_cluster = 30 if not args else int(args[0])
+        num_cluster = 15 if not args else int(args[0])
 
         self.build_tfidf()
 
@@ -34,10 +38,17 @@ class Command(BaseCommand):
 
     def cluster(self, num_cluster):
         category_tfidf = self.category_tfidf
+        categories = list(category_tfidf)
+        random.shuffle(categories)
 
-        features = ndarray((len(category_tfidf), self.DIMENSION), 'float')
-
-        for i, category in enumerate(sorted(category_tfidf)):
+        distances = []
+        for i, category1 in enumerate(categories):
+            cat1_tfidf = category_tfidf[category]
+            row_array = numpy.ndarray((1, i))
+            for j, category2 in enumerate(categories):
+                if j >= i:
+                    break
+                
             tfidf = category_tfidf[category]
             features[i] = array([tfidf.get(term, 0.0) for term in self.max_features])
 
@@ -57,8 +68,8 @@ class Command(BaseCommand):
     def build_tfidf(self):
         document_frequency = collections.Counter()
 
-        document_frequency.update(itertools.chain.from_iterable(self.tokenize(name)
-                                                                for name in Category.objects.values_list('name', flat=True)))
+        #document_frequency.update(itertools.chain.from_iterable(self.tokenize(name)
+        #                                                        for name in Category.objects.values_list('name', flat=True)))
 
         document_frequency.update(itertools.chain.from_iterable(self.tokenize(text)
                                                                 for text in Question.objects.values_list('clue', flat=True)))
@@ -75,7 +86,7 @@ class Command(BaseCommand):
         for clue, category in Question.objects.values_list('clue', 'category__name'):
             if category not in category_bags:
                 category_bags[category] = collections.Counter()
-                category_bags[category].update(self.tokenize(category))
+                #category_bags[category].update(self.tokenize(category))
             category_bags[category].update(self.tokenize(clue))
 
         category_tfidf = self.category_tfidf = {}
@@ -88,8 +99,8 @@ class Command(BaseCommand):
         return self.stemmer.stem(word, 0, len(word) - 1)
 
     def tokenize(self, text):
-        tokens = [self.stem(token.strip('"\'!.-:_')) for token in text.upper().replace('&AMP;', '&').split()
-                  if token not in self.stop_words]
+        tokens = [self.stem(token) for token in non_word_re.split(text.upper().replace('&AMP;', '&'))
+                  if self.stem(token) not in self.stop_words and len(token) > 2]
         tokens = filter(None, tokens)
         bigrams = [' '.join(tokens[i:i + 2]) for i in range(0, len(tokens) - 1)]
         return tokens + bigrams
