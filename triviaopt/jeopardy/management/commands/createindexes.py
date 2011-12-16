@@ -3,6 +3,7 @@ import math
 import random
 import datetime
 import itertools
+import Pycluster
 import simplejson
 import collections
 import re
@@ -52,22 +53,22 @@ class Command(BaseCommand):
 
         distances = []
         for i, category1 in enumerate(categories):
-            cat1_tfidf = category_tfidf[category]
+            cat1_tfidf = category_tfidf[category1]
             row_array = numpy.ndarray((1, i))
             for j, category2 in enumerate(categories):
                 if j >= i:
                     break
-            tfidf = category_tfidf[category]
-            features[i] = array([tfidf.get(term, 0.0) for term in self.max_features])
+                row_array[j] = self.compute_distance(cat1_tfidf, category_tfidf[category2])
 
-        whiten(features)
+            distances.append(row_array)
 
-        result = kmeans2(features, num_cluster, 200)
+        clusterids, error, nfound = Pycluster.kmedoids(distances, num_cluster)
+        print error
 
         categories = [[] for _ in range(num_cluster)]
 
-        for i, category in enumerate(result[1]):
-            categories[category].append(category_keys[i])
+        for i, category in enumerate(clusterids):
+            categories[category].append(categories[i])
 
         return categories
 
