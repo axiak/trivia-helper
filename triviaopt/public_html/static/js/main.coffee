@@ -7,7 +7,6 @@ $(() ->
 
   loadQuestion = () ->
     $.get "/next-question", (data) ->
-      console.log(data)
       comments = data[0].fields.category[0].fields.comments or ''
       current_question = data[0].pk
       question = $("""
