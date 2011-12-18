@@ -54,10 +54,14 @@ class Command(BaseCommand):
         tfidf_norms = {category: sum(value**2 for value in tfidf.values())
                        for category, tfidf in category_tfidf.items()}
 
+        for category, norm in tfidf_norms.items():
+            if not norm:
+                raise Exception((category, category_tfidf[category]))
+
         distances = []
         for i, category1 in enumerate(categories):
             cat1_tfidf = category_tfidf[category1]
-            row_array = numpy.ndarray((1, i))
+            row_array = array([0.0] * i)
             for j, category2 in enumerate(categories):
                 if j >= i:
                     break
@@ -68,12 +72,21 @@ class Command(BaseCommand):
         clusterids, error, nfound = Pycluster.kmedoids(distances, num_cluster)
         print error
 
-        categories = [[] for _ in range(num_cluster)]
+        category_clusters = [[] for _ in range(num_cluster)]
+
+        print len(clusterids)
+        print len(categories)
+        print clusterids
+
+        clusterid_map = {}
+
 
         for i, category in enumerate(clusterids):
-            categories[category].append(categories[i])
+            category_id = clusterid_map.setdefault(category,
+                                                   len(clusterid_map))
+            category_clusters[category_id].append(categories[i])
 
-        return categories
+        return category_clusters
 
     def compute_distance(self, tfidf1, tfidf2, norm1, norm2):
         if len(tfidf1) > len(tfidf2):
@@ -109,13 +122,16 @@ class Command(BaseCommand):
         category_tfidf = self.category_tfidf = {}
         for category, bag in category_bags.items():
             denominator = sum(bag.values())
-            category_tfidf[category] = {term: float(frequency) / denominator * idf.get(term, max_idf) for term, frequency in bag.items()}
+            tfidf = {term: float(frequency) / denominator * idf.get(term, max_idf) for term, frequency in bag.items()}
+            if tfidf:
+                category_tfidf[category] = tfidf
 
     def print_category_info(self, results):
         idf = self.idf
         category_bags = self.category_bags
 
         max_idf = max(idf.values())
+        cat_size = Category.objects.all().count()
 
         for i, category_list in enumerate(results):
             main_bag = collections.Counter()
@@ -127,7 +143,12 @@ class Command(BaseCommand):
             tfidf = {term: float(frequency) / denominator * idf.get(term, max_idf) for term, frequency in main_bag.items()}
             terms = tfidf.items()
             terms.sort(key=lambda x: x[1], reverse=True)
-            print "category %s: %s" % (i, '; '.join(term[0].encode('utf8') for term in terms[:50]))
+            print "category %s (%s subcategories/%0.1f%%): %s" % (
+                i,
+                len(category_list),
+                float(len(category_list)) / cat_size * 100,
+                '; '.join(term[0].encode('utf8') for term in terms[:50]),
+                )
 
 
     def stem(self, word):
