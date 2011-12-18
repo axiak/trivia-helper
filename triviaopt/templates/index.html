@@ -5,9 +5,9 @@
 
 
 {% block content %}
-<p>
+<p class="session-info" data-age="{{ session.age }}">
 You are running a session started on {{ session.date|date:"N j, Y H:i:s" }}
-<a href="/?createSession=true">(start a new one)</a>
+<a class="new-session" title="It's been a while since you've answered with this session, do you want to select a new session?" href="/?createSession=true">(start a new one)</a>
 </p>
 
 <div id="question-container">

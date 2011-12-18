@@ -140,6 +140,7 @@ Question.category_cache = {}
 
 class AnswerSession(models.Model):
     date = models.DateTimeField(default=datetime.datetime.now, db_index=True)
+    last_touch_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User, db_index=True)
 
     _breakdowns = None
@@ -149,6 +150,20 @@ class AnswerSession(models.Model):
 
     def __unicode__(self):
         return u'Session started on {0}'.format(self.date)
+
+    @property
+    def age(self):
+        answers = list(Answer.objects.filter(session=self).order_by('-date')[:1])
+        if not answers:
+            last_date = self.date
+            if self.last_touch_date:
+                last_date = max(last_date, self.last_touch_date)
+        else:
+            last_date = answers[0].date
+        td = datetime.datetime.now() - last_date
+        # in python 2.7...
+        #return td.total_seconds()
+        return (td.microseconds + (td.seconds + td.days * 24.0 * 3600) * 10**6) / 10**6
 
     def get_breakdowns(self):
         if self._breakdowns:

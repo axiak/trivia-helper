@@ -53,4 +53,14 @@ $(() ->
       })
     false
 
+  session_age = $(".session-info").data("age")
+  if session_age > 600
+    $(".new-session").easyconfirm({
+        locale: {
+          title: 'Session is very old.',
+          button: ['No', 'Yes']
+        },
+      })
+    $(".new-session").trigger('click')
+
 )
