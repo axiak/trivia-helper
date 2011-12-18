@@ -209,7 +209,7 @@ class AnswerSession(models.Model):
         user_questions = self.get_user_questions()
         breakdowns[question.category.meta_category] += 1
         user_questions.add(question.id)
-        return correct
+        return correct, question.answer, answer.pk
 
         #cats = self.get_breakdowns().keys()
         #self._category_questions = {}

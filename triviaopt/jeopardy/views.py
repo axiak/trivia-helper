@@ -60,11 +60,11 @@ def next_question(request, session):
 def answer_question(request, session):
     question_id = request.GET['question_id']
     answer = request.GET['answer']
-    is_correct = session.answer_question(request.user, question_id, answer)
+    is_correct, correct_answer, answer_pk = session.answer_question(request.user, question_id, answer)
 
-    return HttpResponse(simplejson.dumps({'is_correct': correct,
-                                          'correct_response': question.answer,
-                                          'answer_id': answer.pk}),
+    return HttpResponse(simplejson.dumps({'is_correct': is_correct,
+                                          'correct_response': correct_answer,
+                                          'answer_id': answer_pk}),
                                          mimetype="application/json")
 
 @with_session
