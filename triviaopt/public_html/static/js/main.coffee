@@ -4,11 +4,14 @@ $(() ->
   start_time = null
   num_right = 0
   num_wrong = 0
+  next_question = null
 
-  loadQuestion = () ->
+  loadQuestion = (cb) ->
+    cb = cb ? (a, b) ->
+      null
+
     $.get "/next-question", (data) ->
       comments = data[0].fields.category[0].fields.comments or ''
-      current_question = data[0].pk
       question = $("""
         <table><tr>
           <td>
@@ -25,12 +28,18 @@ $(() ->
         </tr>
         </table>
       """)
-      $("#question").html(question)
+      next_question = [question, data[0].pk]
+      cb(question, data[0].pk)
+
+  displayQuestion = (question_dom, pk) ->
+      current_question = pk
+      $("#question").html(question_dom)
       $("#answer").val('')
       $("#answer").focus()
       start_time = new Date().getTime()
+      loadQuestion()
 
-  loadQuestion()
+  loadQuestion(displayQuestion)
 
   $("#answerform").submit (e) ->
     $.ajax("/answer-question", {
@@ -49,7 +58,7 @@ $(() ->
               $.ajax("/change-answer", { data: { answer_id: data.answer_id } })
               $(".change-answer").remove()
               return false
-            loadQuestion()
+            displayQuestion(next_question[0], next_question[1])
       })
     false
 
