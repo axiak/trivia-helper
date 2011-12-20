@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'triviaopt.jeopardy',
+    'ajax_select',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -139,3 +140,10 @@ LOGGING = {
 }
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+AJAX_LOOKUP_CHANNELS = {
+    'question': {'model': 'jeopardy.question', 'search_field': 'clue'},
+}
+
+AJAX_SELECT_BOOTSTRAP = True
+AJAX_SELECT_INLINES = 'inline'
