@@ -151,10 +151,11 @@ class AnswerSession(models.Model):
         return u'Session started on {0}'.format(self.date)
 
     def get_breakdowns(self):
+        CATS = (10, 8, 9, 2,)
         if self._breakdowns:
             return self._breakdowns
-        self._breakdowns = Counter(Answer.objects.filter(session=self).values_list('question__category__meta_category', flat=True))
-        for i in set(Category.objects.values_list('meta_category', flat=True)):
+        self._breakdowns = Counter(Answer.objects.filter(session=self, question__category__meta_category__in = CATS).values_list('question__category__meta_category', flat=True))
+        for i in set(Category.objects.filter(meta_category__in=CATS).values_list('meta_category', flat=True)):
             if i not in self._breakdowns:
                 self._breakdowns[i] = 0
         return self._breakdowns
