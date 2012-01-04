@@ -19,6 +19,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         reader = csv.reader(sys.stdin)
         for row in reader:
-            Category.objects.filter(meta_category=row[2]).update(
+            Category.objects.filter(meta_category=row[0]).update(
                 meta_category_name=row[1])
 

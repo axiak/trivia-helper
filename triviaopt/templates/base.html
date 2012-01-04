@@ -11,7 +11,9 @@
   <meta name="description" content="">
   <meta name="author" content="Michael Axiak">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href='http://fonts.googleapis.com/css?family=Crimson+Text:400,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/excite-bike/jquery-ui-1.8.16.custom.css">
 
   {% block headjs %}
   <script src="/static/js/libs/modernizr-2.0.6.min.js"></script>
@@ -34,7 +36,10 @@
       {% endblock %}
     </div>
     <footer>
+      <br>
       Michael Axiak &copy; 2011
+      <br>
+      <a href="https://github.com/axiak/trivia-helper/issues">Issue Tracking</a>
     </footer>
   </div>
 
@@ -48,6 +53,8 @@
     {% block bottomjs %}
     <script defer src="/static/js/plugins.js"></script>
     <script defer src="/static/js/script.js"></script>
+    <script defer src="/static/js/libs/jquery-ui-1.8.16.custom.min.js"></script>
+    <script defer src="/static/js/libs/jquery.easy-confirm-dialog.js"></script>
     {% endblock %}
 
   <!-- end scripts-->
@@ -59,6 +66,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
     <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
   <![endif]-->
-  
+
 </body>
 </html>

@@ -291,7 +291,9 @@ td { vertical-align: top; }
   h2, h3 { page-break-after: avoid; }
 }
 
-
+body { 
+    margin: 10px;
+}
 
 #question-container {
     margin: 20px;
@@ -324,7 +326,7 @@ p.comments {
 
 .inner-clue {
     width: 200px;
-    height: 150px;
+    min-height: 150px;
     padding: 20px;
     font-size: 13pt;
 }
@@ -342,4 +344,31 @@ span.result {
 span.actual-answer {
     font-size: 15px;
     font-weight: bold;
+}
+
+* {
+    font-family: 'Crimson', serif;
+    text-shadow: 0 0 1px transparent;
+}
+
+html {
+    background: #a57800;
+    background-image: url("/static/img/bg1.jpg"), url("/static/img/bg2.jpg");
+    background-repeat: repeat-x, repeat;
+}
+
+h1 {
+    font-size: 30pt;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 2px 2px gray;
+}
+
+#question-container label {
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+#answer {
+    width: 187px;
 }
